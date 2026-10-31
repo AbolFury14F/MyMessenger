@@ -18,7 +18,7 @@ async def handler(websocket):
         connected_clients.remove(websocket)
 
 async def main():
-    # Render به صورت خودکار پورت رو تعیین میکنه، پس پورت رو از محیط می‌خونیم
+    # Render به صورت خودکار پورت رو تعیین میکنه
     port = int(os.environ.get("PORT", 8765))
     async with websockets.serve(handler, "0.0.0.0", port):
         print(f"سرور چت روی پورت {port} روشن شد...")
