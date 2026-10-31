@@ -25,6 +25,7 @@
             flex-direction: column;
             overflow: hidden;
             border: 1px solid #e0e0e0;
+            position: relative;
         }
         .header {
             background: linear-gradient(135deg, #075e54, #128c7e);
@@ -33,15 +34,12 @@
             text-align: center;
             font-size: 18px;
             font-weight: bold;
-            letter-spacing: 1px;
         }
         .messages {
             flex: 1;
             padding: 15px;
             overflow-y: auto;
             background-color: #efeae2;
-            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-size: cover;
             display: flex;
             flex-direction: column;
         }
@@ -54,6 +52,7 @@
             font-size: 14px;
             line-height: 1.5;
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            position: relative;
         }
         .sent {
             background-color: #dcf8c6;
@@ -64,6 +63,12 @@
             background-color: #ffffff;
             align-self: flex-end;
             border-bottom-right-radius: 2px;
+        }
+        .sender-name {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 4px;
+            font-weight: bold;
         }
         .input-area {
             display: flex;
@@ -78,8 +83,6 @@
             border-radius: 24px;
             outline: none;
             font-size: 14px;
-            background-color: #ffffff;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
         }
         .input-area button {
             background-color: #128c7e;
@@ -89,21 +92,55 @@
             margin-right: 10px;
             border-radius: 24px;
             cursor: pointer;
-            font-size: 14px;
             font-weight: bold;
-            transition: background 0.3s;
         }
-        .input-area button:hover {
-            background-color: #075e54;
+
+        /* استایل صفحه ورود (Popup) */
+        .login-popup {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            padding: 20px;
+            transition: opacity 0.3s;
+        }
+        .login-popup h2 { margin-bottom: 20px; color: #075e54; }
+        .login-popup input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .login-popup button {
+            background-color: #128c7e;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="header">چت من</div>
-        <div class="messages" id="messages">
-            <div class="message received">سلام! این اولین پیامه.</div>
+
+<div class="chat-container">
+        <!-- صفحه ورود -->
+        <div class="login-popup" id="loginPopup">
+            <h2>خوش آمدید</h2>
+            <input type="text" id="usernameInput" placeholder="نام خود را وارد کنید...">
+            <button onclick="login()">ورود به چت</button>
         </div>
+
+        <!-- صفحه چت -->
+        <div class="header">چت من</div>
+        <div class="messages" id="messages"></div>
         <div class="input-area">
             <input type="text" id="messageInput" placeholder="پیام خود را بنویسید...">
             <button onclick="sendMessage()">ارسال</button>
