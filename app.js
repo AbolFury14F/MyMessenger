@@ -1,5 +1,5 @@
-// اتصال به سرور آنلاین Render
-const socket = new WebSocket('wss://mymessenger-09ud.onrender.com');
+// اتصال به سرور آنلاین Render (بدون s برای تست)
+const socket = new WebSocket('ws://mymessenger-09ud.onrender.com');
 
 // وقتی پیامی از سرور می‌رسد، آن را نمایش بده
 socket.onmessage = function(event) {
