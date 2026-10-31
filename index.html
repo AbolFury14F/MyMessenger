@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پیام‌رسان من</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            background-color: #e5ddd5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 400px;
+            height: 90vh;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .header {
+            background-color: #075e54;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #e5ddd5;
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            background-color: #dcf8c6;
+            padding: 10px 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            max-width: 80%;
+            align-self: flex-start;
+            word-wrap: break-word;
+        }
+        .input-area {
+            display: flex;
+            padding: 10px;
+            background-color: #f0f0f0;
+        }
+        .input-area input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+        }
+        .input-area button {
+            background-color: #075e54;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-right: 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .input-area button:hover {
+            background-color: #128c7e;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="header">چت من</div>
+        <div class="messages" id="messages">
+            <div class="message">سلام! این اولین پیامه.</div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="پیام خود را بنویسید...">
+            <button onclick="sendMessage()">ارسال</button>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
