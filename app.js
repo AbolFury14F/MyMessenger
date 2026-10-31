@@ -1,5 +1,5 @@
-// اتصال به سرور چت (چون سرور روی کامپیوتر خودت اجرا میشه، localhost استفاده میکنیم)
-const socket = new WebSocket('ws://localhost:8765');
+// اتصال به سرور آنلاین Render
+const socket = new WebSocket('wss://mymessenger-09ud.onrender.com');
 
 // وقتی پیامی از سرور می‌رسد، آن را نمایش بده
 socket.onmessage = function(event) {
