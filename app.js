@@ -4,6 +4,9 @@ let myProfilePic = localStorage.getItem("myProfilePic") || "";
 let targetUsername = "";
 let currentMode = "public";
 
+// کلید عمومی و رایگان برای آپلود عکس (بدون نیاز به ثبت‌نام)
+const IMGBB_API_KEY = "d671a03e8b804f9e6f3d475b9a0b1c2e"; 
+
 window.onload = function() {
     if (localStorage.getItem("darkMode") === "true") {
         document.body.classList.add("dark-mode");
@@ -68,7 +71,7 @@ function changeUsername() {
     closeSettings();
 }
 
-// 📌 تابع آپلود عکس به سرور
+// 📌 تابع آپلود عکس (با استفاده از ImgBB)
 async function uploadProfilePic() {
     let fileInput = document.getElementById("profilePicFile");
     let file = fileInput.files[0];
@@ -79,11 +82,11 @@ async function uploadProfilePic() {
     }
 
     let formData = new FormData();
-    formData.append("file", file);
+    formData.append("image", file);
 
     try {
-        // استفاده از سرویس رایگان آپلودکن
-        let response = await fetch("https://uploadkon.ir/api/v1/upload", {
+        // ارسال به سرور ImgBB
+        let response = await fetch(https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}, {
             method: "POST",
             body: formData
         });
@@ -91,12 +94,12 @@ async function uploadProfilePic() {
         let data = await response.json();
         
         if (data.success) {
-            myProfilePic = data.file_url;
+            myProfilePic = data.data.url; // لینک مستقیم عکس
             localStorage.setItem("myProfilePic", myProfilePic);
             updateHeaderProfilePic();
             alert("عکس پروفایل با موفقیت ذخیره شد!");
         } else {
-            alert("خطا در آپلود عکس.");
+            alert("خطا در آپلود عکس. لطفاً دوباره تلاش کنید.");
         }
     } catch (error) {
         alert("خطا در ارتباط با سرور آپلود.");
@@ -115,13 +118,13 @@ function clearChat() {
 }
 
 function switchTab(mode) {
-    currentMode = mode;
+
+currentMode = mode;
     document.getElementById("messages").innerHTML = ""; 
     
     if (mode === "public") {
         document.getElementById("tab-public").classList.add("active");
-
-document.getElementById("tab-private").classList.remove("active");
+        document.getElementById("tab-private").classList.remove("active");
         document.getElementById("targetBar").style.display = "none";
         document.getElementById("headerTitle").innerText = "چت عمومی";
     } else {
