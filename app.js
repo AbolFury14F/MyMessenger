@@ -2,7 +2,7 @@ const socket = new WebSocket('wss://mymessenger-09ud.onrender.com');
 
 let myUsername = "";
 let targetUsername = "";
-let currentMode = "public"; // حالت پیش‌فرض: عمومی
+let currentMode = "public"; 
 
 function login() {
     let input = document.getElementById("usernameInput").value.trim();
@@ -14,7 +14,7 @@ function login() {
 
 function switchTab(mode) {
     currentMode = mode;
-    document.getElementById("messages").innerHTML = ""; // پاک کردن صفحه
+    document.getElementById("messages").innerHTML = ""; 
     
     if (mode === "public") {
         document.getElementById("tab-public").classList.add("active");
@@ -41,15 +41,15 @@ socket.onmessage = function(event) {
     try {
         let data = JSON.parse(event.data);
         
-        // اگر در حالت عمومی هستیم و پیام برای همه فرستاده شده
+        // 🛑 اصلاح باگ: اگر پیام از طرف خودم بود، نادیده بگیر (چون قبلاً نشون دادیم)
+        if (data.from === myUsername) return;
+
         if (currentMode === "public" && data.type === "public") {
-            displayMessage(data.from, data.text, data.from === myUsername);
-        }
-        // اگر در حالت خصوصی هستیم و پیام مربوط به من و مخاطبمه
-        else if (currentMode === "private" && data.type === "private") {
+            displayMessage(data.from, data.text, false);
+        } else if (currentMode === "private" && data.type === "private") {
             if ((data.from === myUsername && data.to === targetUsername) || 
                 (data.from === targetUsername && data.to === myUsername)) {
-                displayMessage(data.from, data.text, data.from === myUsername);
+                displayMessage(data.from, data.text, false);
             }
         }
     } catch (e) { console.log("خطا:", e); }
@@ -89,6 +89,7 @@ function sendMessage() {
     }
     
     socket.send(JSON.stringify(messageData));
+    // نمایش پیام خودم روی صفحه (فقط یک بار)
     displayMessage(myUsername, text, true);
     
     input.value = "";
