@@ -139,39 +139,27 @@ socket.onmessage = function(event) {
         if (data.from === myUsername) return; 
 
         if (currentMode === "public" && data.type === "public") {
-            displayMessage(data.from, data.text, false, data.profilePic);
+            // 📌 عکس پروفایل رو از پیام حذف کردیم
+            displayMessage(data.from, data.text, false);
         } else if (currentMode === "private" && data.type === "private") {
             if ((data.from === myUsername && data.to === targetUsername) || 
                 (data.from === targetUsername && data.to === myUsername)) {
-                displayMessage(data.from, data.text, false, data.profilePic);
+                displayMessage(data.from, data.text, false);
             }
         }
     } catch (e) { console.log("خطا:", e); }
 };
 
-// 📌 تابع نمایش پیام با عکس پروفایل (اصلاح شده)
-function displayMessage(sender, text, isMe, profilePic) {
+function displayMessage(sender, text, isMe) {
     var messagesBox = document.getElementById("messages");
     var newMessage = document.createElement("div");
     newMessage.className = isMe ? "message sent" : "message received";
     
-    let msgHeader = document.createElement("div");
-    msgHeader.className = "msg-header";
-    
-    // اگر عکس پروفایل وجود داشت، نمایش بده
-    if (profilePic) {
-        let img = document.createElement("img");
-        img.src = profilePic;
-        img.className = "profile-pic";
-        msgHeader.appendChild(img);
-    }
-    
     let nameTag = document.createElement("div");
     nameTag.className = "sender-name";
     nameTag.innerText = sender;
-    msgHeader.appendChild(nameTag);
     
-    newMessage.appendChild(msgHeader);
+    newMessage.appendChild(nameTag);
     newMessage.appendChild(document.createTextNode(text));
     
     messagesBox.appendChild(newMessage);
@@ -185,8 +173,8 @@ function sendMessage() {
     let text = input.value.trim();
     if (text === "") return;
     
-    // 📌 ارسال عکس پروفایل همراه پیام
-    let messageData = { from: myUsername, text: text, profilePic: myProfilePic };
+    // 📌 عکس پروفایل رو از دیتای ارسالی حذف کردیم
+    let messageData = { from: myUsername, text: text };
     
     if (currentMode === "public") {
         messageData.type = "public";
@@ -197,7 +185,7 @@ function sendMessage() {
     }
     
     socket.send(JSON.stringify(messageData));
-    displayMessage(myUsername, text, true, myProfilePic);
+    displayMessage(myUsername, text, true);
     
     input.value = "";
 }
