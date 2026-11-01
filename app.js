@@ -12,6 +12,7 @@ window.onload = function() {
         document.getElementById("loginPopup").style.display = "none";
         document.getElementById("headerTitle").innerText = "چت عمومی";
         updateHeaderProfilePic();
+        // 📌 ارسال درخواست تاریخچه به سرور
         socket.send(JSON.stringify({ type: "init", from: myUsername }));
     } else {
         document.getElementById("loginPopup").style.display = "flex";
@@ -36,13 +37,15 @@ function login() {
     document.getElementById("loginPopup").style.display = "none";
     document.getElementById("headerTitle").innerText = "چت عمومی";
     updateHeaderProfilePic();
+    // 📌 ارسال درخواست تاریخچه به سرور
     socket.send(JSON.stringify({ type: "init", from: myUsername }));
 }
 
 function logout() {
     localStorage.removeItem("myUsername");
     localStorage.removeItem("myProfilePic");
-    myUsername = ""; myProfilePic = "";
+    myUsername = "";
+    myProfilePic = "";
     closeSettings();
     document.getElementById("loginPopup").style.display = "flex";
     document.getElementById("messages").innerHTML = "";
@@ -71,7 +74,12 @@ function changeUsername() {
 function saveProfilePic() {
     let fileInput = document.getElementById("profilePicFile");
     let file = fileInput.files[0];
-    if (!file) { alert("لطفاً ابتدا یک عکس انتخاب کنید."); return; }
+    
+    if (!file) {
+        alert("لطفاً ابتدا یک عکس انتخاب کنید.");
+        return;
+    }
+
     let reader = new FileReader();
     reader.onload = function(e) {
         myProfilePic = e.target.result;
@@ -95,6 +103,7 @@ function clearChat() {
 function switchTab(mode) {
     currentMode = mode;
     document.getElementById("messages").innerHTML = ""; 
+    
     if (mode === "public") {
         document.getElementById("tab-public").classList.add("active");
         document.getElementById("tab-private").classList.remove("active");
@@ -102,7 +111,8 @@ function switchTab(mode) {
         document.getElementById("headerTitle").innerText = "چت عمومی";
     } else {
         document.getElementById("tab-public").classList.remove("active");
-        document.getElementById("tab-private").classList.add("active");
+
+document.getElementById("tab-private").classList.add("active");
         document.getElementById("targetBar").style.display = "flex";
         document.getElementById("headerTitle").innerText = targetUsername ? "چت با " + targetUsername : "چت خصوصی";
     }
@@ -127,11 +137,12 @@ function addEmoji(emoji) {
     document.getElementById("emojiPicker").style.display = "none"; 
 }
 
+// 📌 دریافت پیام‌ها از سرور
 socket.onmessage = function(event) {
     try {
         let data = JSON.parse(event.data);
-        if (data.from === myUsername && data.type !== "init") return; 
         if (data.type === "init") return;
+        if (data.from === myUsername && data.type !== "tick") return; 
 
         if (currentMode === "public" && data.type === "public") {
             displayMessage(data.from, data.text, false);
@@ -148,22 +159,27 @@ function displayMessage(sender, text, isMe) {
     var messagesBox = document.getElementById("messages");
     var newMessage = document.createElement("div");
     newMessage.className = isMe ? "message sent" : "message received";
+    
     let nameTag = document.createElement("div");
     nameTag.className = "sender-name";
     nameTag.innerText = sender;
+    
     newMessage.appendChild(nameTag);
     newMessage.appendChild(document.createTextNode(text));
+    
     messagesBox.appendChild(newMessage);
     messagesBox.scrollTop = messagesBox.scrollHeight;
 }
 
 function sendMessage() {
     if (myUsername === "") { alert("اول اسمت رو وارد کن!"); return; }
+    
     let input = document.getElementById("messageInput");
     let text = input.value.trim();
     if (text === "") return;
     
     let messageData = { from: myUsername, text: text };
+    
     if (currentMode === "public") {
         messageData.type = "public";
     } else {
@@ -171,7 +187,9 @@ function sendMessage() {
         messageData.type = "private";
         messageData.to = targetUsername;
     }
+    
     socket.send(JSON.stringify(messageData));
     displayMessage(myUsername, text, true);
+    
     input.value = "";
 }
