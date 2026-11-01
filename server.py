@@ -40,5 +40,5 @@ async def main():
         print(f"سرور ساده روی پورت {port} روشن شد...")
         await asyncio.Future()
 
-if name == "__main__":
+if __name__ == "__main__":
     asyncio.run(main())
