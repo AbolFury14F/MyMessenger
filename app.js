@@ -22,7 +22,6 @@ function connectWebSocket() {
         try {
             let data = JSON.parse(event.data);
 
-            // فقط پیام‌های عمومی و خصوصی رو نمایش بده
             if (data.type !== "public" && data.type !== "private") return;
 
             let isMe = (data.from === myUsername);
@@ -116,26 +115,6 @@ function closeSettings() {
     document.getElementById("settingsPopup").style.display = "none";
 }
 
-let input = document.getElementById("messageInput");
-    let text = input.value.trim();
-    if (text === "") return;
-
-    let messageData = { from: myUsername, text: text };
-
-    if (currentMode === "public") {
-        messageData.type = "public";
-    } else {
-        if (targetUsername === "") { alert("اول اسم مخاطب رو تنظیم کن!"); return; }
-        messageData.type = "private";
-        messageData.to = targetUsername;
-    }
-
-    socket.send(JSON.stringify(messageData));
-    displayMessage(myUsername, text, true);
-
-    input.value = "";
-}
-
 function changeUsername() {
     let newName = document.getElementById("newUsernameInput").value.trim();
     if (newName === "") { alert("نام جدید رو وارد کن!"); return; }
@@ -192,7 +171,6 @@ function switchTab(mode) {
         document.getElementById("headerTitle").innerText = targetUsername ? "چت با " + targetUsername : "چت خصوصی";
     }
 
-    // درخواست مجدد تاریخچه (اختیاری، برای اینکه پیام‌ها با تب عوض‌شدن دوباره بیان)
     if (socket.readyState === WebSocket.OPEN && myUsername !== "") {
         socket.send(JSON.stringify({ type: "init", from: myUsername }));
     }
@@ -205,7 +183,6 @@ function setTarget() {
     document.getElementById("headerTitle").innerText = "چت با " + targetUsername;
     document.getElementById("messages").innerHTML = "";
 
-    // دریافت تاریخچه چت خصوصی با این شخص
     if (socket.readyState === WebSocket.OPEN && myUsername !== "") {
         socket.send(JSON.stringify({ type: "init", from: myUsername }));
     }
@@ -248,3 +225,21 @@ function sendMessage() {
         alert("در حال اتصال به سرور، لطفاً صبر کنید...");
         return;
     }
+
+    let input = document.getElementById("messageInput");
+    let text = input.value.trim();
+    if (text === "") return;let messageData = { from: myUsername, text: text };
+
+    if (currentMode === "public") {
+        messageData.type = "public";
+    } else {
+        if (targetUsername === "") { alert("اول اسم مخاطب رو تنظیم کن!"); return; }
+        messageData.type = "private";
+        messageData.to = targetUsername;
+    }
+
+    socket.send(JSON.stringify(messageData));
+    displayMessage(myUsername, text, true);
+
+    input.value = "";
+}
