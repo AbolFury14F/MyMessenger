@@ -1,18 +1,41 @@
 const socket = new WebSocket('wss://mymessenger-09ud.onrender.com');
-
-let myUsername = "";
+let myUsername = localStorage.getItem("myUsername") || "";
 let targetUsername = "";
 let currentMode = "public";
+
+// بررسی وضعیت ورود در هنگام بارگذاری
+window.onload = function() {
+    // بررسی حالت تاریک
+    if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark-mode");
+    }
+    
+    if (myUsername !== "") {
+        document.getElementById("loginPopup").style.display = "none";
+        document.getElementById("headerTitle").innerText = "چت عمومی";
+    } else {
+        document.getElementById("loginPopup").style.display = "flex";
+    }
+};
 
 function login() {
     let input = document.getElementById("usernameInput").value.trim();
     if (input === "") { alert("اسمت رو وارد کن!"); return; }
     myUsername = input;
+    localStorage.setItem("myUsername", myUsername); // ذخیره در حافظه مرورگر
     document.getElementById("loginPopup").style.display = "none";
     document.getElementById("headerTitle").innerText = "چت عمومی";
 }
 
-// 📌 توابع تنظیمات
+function logout() {
+    localStorage.removeItem("myUsername");
+    myUsername = "";
+    closeSettings();
+    document.getElementById("loginPopup").style.display = "flex";
+    document.getElementById("messages").innerHTML = "";
+}
+
+// 📌 تنظیمات
 function openSettings() {
     if (myUsername === "") return;
     document.getElementById("newUsernameInput").value = myUsername;
@@ -27,17 +50,31 @@ function changeUsername() {
     let newName = document.getElementById("newUsernameInput").value.trim();
     if (newName === "") { alert("نام جدید رو وارد کن!"); return; }
     myUsername = newName;
-    alert("نام شما با موفقیت به " + newName + " تغییر کرد.");
+    localStorage.setItem("myUsername", myUsername);
+    alert("نام شما با موفقیت تغییر کرد.");
     closeSettings();
-    
-    // آپدیت هدر بر اساس حالت فعلی
-    if (currentMode === "public") {
-        document.getElementById("headerTitle").innerText = "چت عمومی";
-    } else {
-        document.getElementById("headerTitle").innerText = targetUsername ? "چت با " + targetUsername : "چت خصوصی";
+}
+
+function changeProfilePic() {
+    let picUrl = document.getElementById("profilePicInput").value.trim();
+    if (picUrl) {
+        localStorage.setItem("profilePic", picUrl);
+        alert("عکس پروفایل ذخیره شد!");
     }
 }
 
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+    let isDark = document.body.classList.contains("dark-mode");
+    localStorage.setItem("darkMode", isDark);
+}
+
+function clearChat() {
+    document.getElementById("messages").innerHTML = "";
+    closeSettings();
+}
+
+// 📌 تب‌ها و چت
 function switchTab(mode) {
     currentMode = mode;
     document.getElementById("messages").innerHTML = ""; 
@@ -77,9 +114,9 @@ function addEmoji(emoji) {
 socket.onmessage = function(event) {
     try {
         let data = JSON.parse(event.data);
-        if (data.from === myUsername) return; 
+        if (data.from === myUsername) return;
 
-        if (currentMode === "public" && data.type === "public") {
+if (currentMode === "public" && data.type === "public") {
             displayMessage(data.from, data.text, false);
         } else if (currentMode === "private" && data.type === "private") {
             if ((data.from === myUsername && data.to === targetUsername) || 
