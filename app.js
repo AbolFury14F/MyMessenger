@@ -1,11 +1,10 @@
 const socket = new WebSocket('wss://mymessenger-09ud.onrender.com');
 let myUsername = localStorage.getItem("myUsername") || "";
+let myProfilePic = localStorage.getItem("myProfilePic") || "";
 let targetUsername = "";
 let currentMode = "public";
 
-// بررسی وضعیت ورود در هنگام بارگذاری
 window.onload = function() {
-    // بررسی حالت تاریک
     if (localStorage.getItem("darkMode") === "true") {
         document.body.classList.add("dark-mode");
     }
@@ -13,32 +12,47 @@ window.onload = function() {
     if (myUsername !== "") {
         document.getElementById("loginPopup").style.display = "none";
         document.getElementById("headerTitle").innerText = "چت عمومی";
+        updateHeaderProfilePic();
     } else {
         document.getElementById("loginPopup").style.display = "flex";
     }
 };
 
+function updateHeaderProfilePic() {
+    let headerPic = document.getElementById("headerProfilePic");
+    if (myProfilePic) {
+        headerPic.src = myProfilePic;
+        headerPic.style.display = "block";
+    } else {
+        headerPic.style.display = "none";
+    }
+}
+
 function login() {
     let input = document.getElementById("usernameInput").value.trim();
     if (input === "") { alert("اسمت رو وارد کن!"); return; }
     myUsername = input;
-    localStorage.setItem("myUsername", myUsername); // ذخیره در حافظه مرورگر
+    localStorage.setItem("myUsername", myUsername);
     document.getElementById("loginPopup").style.display = "none";
     document.getElementById("headerTitle").innerText = "چت عمومی";
+    updateHeaderProfilePic();
 }
 
 function logout() {
     localStorage.removeItem("myUsername");
+    localStorage.removeItem("myProfilePic");
     myUsername = "";
+    myProfilePic = "";
     closeSettings();
     document.getElementById("loginPopup").style.display = "flex";
     document.getElementById("messages").innerHTML = "";
+    document.getElementById("headerProfilePic").style.display = "none";
 }
 
-// 📌 تنظیمات
 function openSettings() {
     if (myUsername === "") return;
     document.getElementById("newUsernameInput").value = myUsername;
+    document.getElementById("profilePicInput").value = myProfilePic;
     document.getElementById("settingsPopup").style.display = "flex";
 }
 
@@ -57,16 +71,15 @@ function changeUsername() {
 
 function changeProfilePic() {
     let picUrl = document.getElementById("profilePicInput").value.trim();
-    if (picUrl) {
-        localStorage.setItem("profilePic", picUrl);
-        alert("عکس پروفایل ذخیره شد!");
-    }
+    myProfilePic = picUrl;
+    localStorage.setItem("myProfilePic", myProfilePic);
+    updateHeaderProfilePic();
+    alert("عکس پروفایل ذخیره شد!");
 }
 
 function toggleDarkMode() {
     document.body.classList.toggle("dark-mode");
-    let isDark = document.body.classList.contains("dark-mode");
-    localStorage.setItem("darkMode", isDark);
+    localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
 }
 
 function clearChat() {
@@ -74,7 +87,6 @@ function clearChat() {
     closeSettings();
 }
 
-// 📌 تب‌ها و چت
 function switchTab(mode) {
     currentMode = mode;
     document.getElementById("messages").innerHTML = ""; 
@@ -114,9 +126,9 @@ function addEmoji(emoji) {
 socket.onmessage = function(event) {
     try {
         let data = JSON.parse(event.data);
-        if (data.from === myUsername) return;
+        if (data.from === myUsername) return; 
 
-if (currentMode === "public" && data.type === "public") {
+        if (currentMode === "public" && data.type === "public") {
             displayMessage(data.from, data.text, false);
         } else if (currentMode === "private" && data.type === "private") {
             if ((data.from === myUsername && data.to === targetUsername) || 
@@ -132,11 +144,22 @@ function displayMessage(sender, text, isMe) {
     var newMessage = document.createElement("div");
     newMessage.className = isMe ? "message sent" : "message received";
     
+    let msgHeader = document.createElement("div");
+    msgHeader.className = "msg-header";
+    
+    if (isMe && myProfilePic) {
+        let img = document.createElement("img");
+        img.src = myProfilePic;
+        img.className = "profile-pic";
+        msgHeader.appendChild(img);
+    }
+    
     let nameTag = document.createElement("div");
     nameTag.className = "sender-name";
     nameTag.innerText = sender;
+    msgHeader.appendChild(nameTag);
     
-    newMessage.appendChild(nameTag);
+    newMessage.appendChild(msgHeader);
     newMessage.appendChild(document.createTextNode(text));
     
     messagesBox.appendChild(newMessage);
