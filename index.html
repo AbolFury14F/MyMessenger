@@ -37,7 +37,6 @@
         .header-title { font-weight: bold; font-size: 18px; color: #128c7e; }
         .settings-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-color); }
 
-        /* استایل عکس پروفایل */
         .profile-pic { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; margin-left: 5px; vertical-align: middle; border: 2px solid #128c7e; }
         .header-profile { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; margin-left: 10px; display: none; border: 2px solid #128c7e; }
         .msg-header { display: flex; align-items: center; margin-bottom: 5px; }
@@ -113,13 +112,14 @@
         <!-- صفحه تنظیمات -->
         <div class="popup" id="settingsPopup" style="display: none;">
             <h2>⚙️ تنظیمات</h2>
+            
             <p style="margin-bottom: 10px; font-size: 14px;">تغییر نام:</p>
             <input type="text" id="newUsernameInput" placeholder="نام جدید...">
             <button onclick="changeUsername()">ذخیره نام</button>
 
-            <p style="margin-bottom: 10px; font-size: 14px;">لینک عکس پروفایل:</p>
-            <input type="text" id="profilePicInput" placeholder="https://example.com/pic.jpg">
-            <button onclick="changeProfilePic()">ذخیره عکس</button>
+            <p style="margin-bottom: 10px; font-size: 14px;">انتخاب عکس پروفایل:</p>
+            <input type="file" id="profilePicFile" accept="image/*" style="background: none; border: none; padding: 0; margin-bottom: 10px;">
+            <button onclick="uploadProfilePic()">آپلود و ذخیره عکس</button>
 
             <button class="secondary" onclick="toggleDarkMode()">🌙 تغییر حالت (روشن/تاریک)</button>
             <button class="danger" onclick="clearChat()">🗑️ پاک کردن چت</button>
