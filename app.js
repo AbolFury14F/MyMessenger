@@ -1,20 +1,32 @@
-// اتصال امن به سرور
 const socket = new WebSocket('wss://mymessenger-09ud.onrender.com');
 
 let myUsername = "";
 let targetUsername = "";
-
-// نمایش وضعیت اتصال در کنسول (برای عیب‌یابی)
-socket.onopen = function() { console.log("به سرور وصل شدیم!"); };
-socket.onclose = function() { console.log("اتصال به سرور قطع شد."); };
-socket.onerror = function(error) { console.log("خطای اتصال:", error); };
+let currentMode = "public"; // حالت پیش‌فرض: عمومی
 
 function login() {
     let input = document.getElementById("usernameInput").value.trim();
     if (input === "") { alert("اسمت رو وارد کن!"); return; }
     myUsername = input;
     document.getElementById("loginPopup").style.display = "none";
-    document.getElementById("headerTitle").innerText = "چت - " + myUsername;
+    document.getElementById("headerTitle").innerText = "چت عمومی";
+}
+
+function switchTab(mode) {
+    currentMode = mode;
+    document.getElementById("messages").innerHTML = ""; // پاک کردن صفحه
+    
+    if (mode === "public") {
+        document.getElementById("tab-public").classList.add("active");
+        document.getElementById("tab-private").classList.remove("active");
+        document.getElementById("targetBar").style.display = "none";
+        document.getElementById("headerTitle").innerText = "چت عمومی";
+    } else {
+        document.getElementById("tab-public").classList.remove("active");
+        document.getElementById("tab-private").classList.add("active");
+        document.getElementById("targetBar").style.display = "flex";
+        document.getElementById("headerTitle").innerText = targetUsername ? "چت با " + targetUsername : "چت خصوصی";
+    }
 }
 
 function setTarget() {
@@ -22,74 +34,62 @@ function setTarget() {
     if (target === "") { alert("اسم مخاطب رو وارد کن!"); return; }
     targetUsername = target;
     document.getElementById("headerTitle").innerText = "چت با " + targetUsername;
-    document.getElementById("messages").innerHTML = ""; 
+    document.getElementById("messages").innerHTML = "";
 }
 
-// دریافت پیام از سرور
 socket.onmessage = function(event) {
-    console.log("پیام دریافتی خام:", event.data); // نمایش پیام خام در کنسول
     try {
         let data = JSON.parse(event.data);
         
-        // فقط پیام‌هایی رو نشون بده که مربوط به من و مخاطبمه
-        if ((data.from === myUsername && data.to === targetUsername) || 
-            (data.from === targetUsername && data.to === myUsername)) {
-            
-            var messagesBox = document.getElementById("messages");
-            var newMessage = document.createElement("div");
-            
-            if (data.from === myUsername) {
-                newMessage.className = "message sent";
-            } else {
-                newMessage.className = "message received";
-            }
-            
-            let nameTag = document.createElement("div");
-            nameTag.className = "sender-name";
-            nameTag.innerText = data.from;
-            
-            newMessage.appendChild(nameTag);
-            newMessage.appendChild(document.createTextNode(data.text));
-            
-            messagesBox.appendChild(newMessage);
-            messagesBox.scrollTop = messagesBox.scrollHeight;
+        // اگر در حالت عمومی هستیم و پیام برای همه فرستاده شده
+        if (currentMode === "public" && data.type === "public") {
+            displayMessage(data.from, data.text, data.from === myUsername);
         }
-    } catch (e) { console.log("خطا در پردازش پیام:", e); }
+        // اگر در حالت خصوصی هستیم و پیام مربوط به من و مخاطبمه
+        else if (currentMode === "private" && data.type === "private") {
+            if ((data.from === myUsername && data.to === targetUsername) || 
+                (data.from === targetUsername && data.to === myUsername)) {
+                displayMessage(data.from, data.text, data.from === myUsername);
+            }
+        }
+    } catch (e) { console.log("خطا:", e); }
 };
 
-// ارسال پیام
-function sendMessage() {
-    if (myUsername === "" || targetUsername === "") {
-        alert("اول اسم خودت و مخاطبت رو وارد کن!");
-        return;
-    }
+function displayMessage(sender, text, isMe) {
+    var messagesBox = document.getElementById("messages");
+    var newMessage = document.createElement("div");
+    newMessage.className = isMe ? "message sent" : "message received";
+    
+    let nameTag = document.createElement("div");
+    nameTag.className = "sender-name";
+    nameTag.innerText = sender;
+    
+    newMessage.appendChild(nameTag);
+    newMessage.appendChild(document.createTextNode(text));
+    
+    messagesBox.appendChild(newMessage);
+    messagesBox.scrollTop = messagesBox.scrollHeight;
+}
 
+function sendMessage() {
+    if (myUsername === "") { alert("اول اسمت رو وارد کن!"); return; }
+    
     let input = document.getElementById("messageInput");
     let text = input.value.trim();
     if (text === "") return;
     
-    let messageData = {
-        from: myUsername,
-        to: targetUsername,
-        text: text
-    };
+    let messageData = { from: myUsername, text: text };
+    
+    if (currentMode === "public") {
+        messageData.type = "public";
+    } else {
+        if (targetUsername === "") { alert("اول اسم مخاطب رو تنظیم کن!"); return; }
+        messageData.type = "private";
+        messageData.to = targetUsername;
+    }
     
     socket.send(JSON.stringify(messageData));
-    
-    // نمایش پیام خودم روی صفحه
-    var messagesBox = document.getElementById("messages");
-    var myMessage = document.createElement("div");
-    myMessage.className = "message sent";
-    
-    let nameTag = document.createElement("div");
-    nameTag.className = "sender-name";
-    nameTag.innerText = "من";
-    
-    myMessage.appendChild(nameTag);
-    myMessage.appendChild(document.createTextNode(text));
-    
-    messagesBox.appendChild(myMessage);
-    messagesBox.scrollTop = messagesBox.scrollHeight;
+    displayMessage(myUsername, text, true);
     
     input.value = "";
 }
