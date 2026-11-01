@@ -100,9 +100,7 @@ socket.onmessage = function(event) {
             }
         }
     } catch (e) { console.log("خطا:", e); }
-};
-
-function displayMessage(sender, text, isMe) {
+};function displayMessage(sender, text, isMe) {
     var messagesBox = document.getElementById("messages");
     var newMessage = document.createElement("div");
     newMessage.className = isMe ? "message sent" : "message received";
