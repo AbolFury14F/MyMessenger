@@ -3,7 +3,6 @@ import websockets
 import os
 import json
 
-# دیکشنری برای نگه‌داری ارتباط بین اسم کاربر و اتصالش
 connected_clients = {}
 
 async def handler(websocket):
@@ -12,12 +11,10 @@ async def handler(websocket):
         async for message in websocket:
             data = json.loads(message)
             
-            # اگر پیام شامل اطلاعات فرستنده است، اسمش رو ثبت کن
             if "from" in data:
                 user_name = data["from"]
                 connected_clients[user_name] = websocket
                 
-                # ارسال پیام به گیرنده خاص
                 target = data.get("to")
                 if target in connected_clients:
                     try:
@@ -27,7 +24,6 @@ async def handler(websocket):
     except websockets.exceptions.ConnectionClosed:
         pass
     finally:
-        # وقتی کاربر قطع شد، اسمش رو از لیست حذف کن
         if user_name and user_name in connected_clients:
             del connected_clients[user_name]
 
