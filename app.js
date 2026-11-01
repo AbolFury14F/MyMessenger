@@ -2,7 +2,12 @@
 const socket = new WebSocket('wss://mymessenger-09ud.onrender.com');
 
 let myUsername = "";
-let targetUsername = ""; // نام کسی که می‌خوایم باهاش چت کنیم
+let targetUsername = "";
+
+// نمایش وضعیت اتصال در کنسول (برای عیب‌یابی)
+socket.onopen = function() { console.log("به سرور وصل شدیم!"); };
+socket.onclose = function() { console.log("اتصال به سرور قطع شد."); };
+socket.onerror = function(error) { console.log("خطای اتصال:", error); };
 
 function login() {
     let input = document.getElementById("usernameInput").value.trim();
@@ -17,13 +22,15 @@ function setTarget() {
     if (target === "") { alert("اسم مخاطب رو وارد کن!"); return; }
     targetUsername = target;
     document.getElementById("headerTitle").innerText = "چت با " + targetUsername;
-    document.getElementById("messages").innerHTML = ""; // پاک کردن پیام‌های قبلی
+    document.getElementById("messages").innerHTML = ""; 
 }
 
 // دریافت پیام از سرور
 socket.onmessage = function(event) {
+    console.log("پیام دریافتی خام:", event.data); // نمایش پیام خام در کنسول
     try {
         let data = JSON.parse(event.data);
+        
         // فقط پیام‌هایی رو نشون بده که مربوط به من و مخاطبمه
         if ((data.from === myUsername && data.to === targetUsername) || 
             (data.from === targetUsername && data.to === myUsername)) {
@@ -31,7 +38,6 @@ socket.onmessage = function(event) {
             var messagesBox = document.getElementById("messages");
             var newMessage = document.createElement("div");
             
-            // اگه پیام از طرف خودمه، سبز. وگرنه سفید.
             if (data.from === myUsername) {
                 newMessage.className = "message sent";
             } else {
@@ -48,7 +54,7 @@ socket.onmessage = function(event) {
             messagesBox.appendChild(newMessage);
             messagesBox.scrollTop = messagesBox.scrollHeight;
         }
-    } catch (e) { console.log("خطا در دریافت:", e); }
+    } catch (e) { console.log("خطا در پردازش پیام:", e); }
 };
 
 // ارسال پیام
