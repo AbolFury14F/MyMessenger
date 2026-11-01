@@ -37,16 +37,17 @@ function setTarget() {
     document.getElementById("messages").innerHTML = "";
 }
 
-// توابع ایموجی
+// 📌 اضافه شدن منطق باز و بسته شدن پنل ایموجی
 function toggleEmoji() {
     let picker = document.getElementById("emojiPicker");
     picker.style.display = picker.style.display === "grid" ? "none" : "grid";
 }
 
+// 📌 اضافه شدن ایموجی به کادر تایپ
 function addEmoji(emoji) {
     let input = document.getElementById("messageInput");
     input.value += emoji;
-    document.getElementById("emojiPicker").style.display = "none"; // بستن پنل بعد از انتخاب
+    document.getElementById("emojiPicker").style.display = "none"; 
 }
 
 socket.onmessage = function(event) {
