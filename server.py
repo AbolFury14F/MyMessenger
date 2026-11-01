@@ -15,7 +15,7 @@ async def handler(websocket):
                 user_name = sender
                 connected_clients[user_name] = websocket
 
-            # پیام عمومی: به همه بفرست
+            # اگر پیام عمومی بود
             if data.get("type") == "public":
                 for client in connected_clients.values():
                     try:
@@ -23,14 +23,16 @@ async def handler(websocket):
                     except:
                         pass
             
-            # پیام خصوصی: فقط به گیرنده بفرست
+            # اگر پیام خصوصی بود
             elif data.get("type") == "private":
                 target = data.get("to")
+                # ارسال به گیرنده
                 if target in connected_clients:
                     try:
                         await connected_clients[target].send(message)
                     except:
                         pass
+                # ارسال به فرستنده (تا در صفحه خودش هم دیده شود) -> این خط را حذف کردیم تا باگ دوبار نمایش حل شود
     except websockets.exceptions.ConnectionClosed:
         pass
     finally:
