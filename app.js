@@ -5,10 +5,14 @@ let targetUsername = "";
 let currentMode = "public";
 
 window.onload = function() {
+    if (localStorage.getItem("darkMode") === "true") {
+        document.body.classList.add("dark-mode");
+    }
     if (myUsername !== "") {
         document.getElementById("loginPopup").style.display = "none";
         document.getElementById("headerTitle").innerText = "چت عمومی";
         updateHeaderProfilePic();
+        socket.send(JSON.stringify({ type: "init", from: myUsername }));
     } else {
         document.getElementById("loginPopup").style.display = "flex";
     }
@@ -32,6 +36,7 @@ function login() {
     document.getElementById("loginPopup").style.display = "none";
     document.getElementById("headerTitle").innerText = "چت عمومی";
     updateHeaderProfilePic();
+    socket.send(JSON.stringify({ type: "init", from: myUsername }));
 }
 
 function closeSettings() {
@@ -83,7 +88,8 @@ function addEmoji(emoji) {
 socket.onmessage = function(event) {
     try {
         let data = JSON.parse(event.data);
-        if (data.from === myUsername && data.type !== "tick") return; 
+        if (data.type === "init") return;
+        if (data.from === myUsername) return; 
 
         if (currentMode === "public" && data.type === "public") {
             displayMessage(data.from, data.text, false);
@@ -100,8 +106,8 @@ function displayMessage(sender, text, isMe) {
     var messagesBox = document.getElementById("messages");
     var newMessage = document.createElement("div");
     newMessage.className = isMe ? "message sent" : "message received";
-
-let nameTag = document.createElement("div");
+    
+    let nameTag = document.createElement("div");
     nameTag.className = "sender-name";
     nameTag.innerText = sender;
     
