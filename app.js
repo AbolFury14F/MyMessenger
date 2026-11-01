@@ -52,7 +52,6 @@ function logout() {
 function openSettings() {
     if (myUsername === "") return;
     document.getElementById("newUsernameInput").value = myUsername;
-    document.getElementById("profilePicInput").value = myProfilePic;
     document.getElementById("settingsPopup").style.display = "flex";
 }
 
@@ -69,12 +68,40 @@ function changeUsername() {
     closeSettings();
 }
 
-function changeProfilePic() {
-    let picUrl = document.getElementById("profilePicInput").value.trim();
-    myProfilePic = picUrl;
-    localStorage.setItem("myProfilePic", myProfilePic);
-    updateHeaderProfilePic();
-    alert("عکس پروفایل ذخیره شد!");
+// 📌 تابع آپلود عکس به سرور
+async function uploadProfilePic() {
+    let fileInput = document.getElementById("profilePicFile");
+    let file = fileInput.files[0];
+    
+    if (!file) {
+        alert("لطفاً ابتدا یک عکس انتخاب کنید.");
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("file", file);
+
+    try {
+        // استفاده از سرویس رایگان آپلودکن
+        let response = await fetch("https://uploadkon.ir/api/v1/upload", {
+            method: "POST",
+            body: formData
+        });
+        
+        let data = await response.json();
+        
+        if (data.success) {
+            myProfilePic = data.file_url;
+            localStorage.setItem("myProfilePic", myProfilePic);
+            updateHeaderProfilePic();
+            alert("عکس پروفایل با موفقیت ذخیره شد!");
+        } else {
+            alert("خطا در آپلود عکس.");
+        }
+    } catch (error) {
+        alert("خطا در ارتباط با سرور آپلود.");
+        console.error(error);
+    }
 }
 
 function toggleDarkMode() {
@@ -93,7 +120,8 @@ function switchTab(mode) {
     
     if (mode === "public") {
         document.getElementById("tab-public").classList.add("active");
-        document.getElementById("tab-private").classList.remove("active");
+
+document.getElementById("tab-private").classList.remove("active");
         document.getElementById("targetBar").style.display = "none";
         document.getElementById("headerTitle").innerText = "چت عمومی";
     } else {
