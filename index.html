@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پیام‌رسان من</title>
+    <title>پیام‌رسان PV</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -16,7 +16,7 @@
         }
         .chat-container {
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
             height: 90vh;
             background-color: #ffffff;
             border-radius: 16px;
@@ -30,10 +30,33 @@
         .header {
             background: linear-gradient(135deg, #075e54, #128c7e);
             color: white;
-            padding: 18px;
+            padding: 15px;
             text-align: center;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
+        }
+        .target-bar {
+            background-color: #e9edef;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ccc;
+            font-size: 14px;
+        }
+        .target-bar input {
+            padding: 6px;
+            border-radius: 5px;
+            border: 1px solid #aaa;
+            width: 150px;
+        }
+        .target-bar button {
+            background-color: #128c7e;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
         }
         .messages {
             flex: 1;
@@ -50,9 +73,7 @@
             max-width: 75%;
             word-wrap: break-word;
             font-size: 14px;
-            line-height: 1.5;
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            position: relative;
         }
         .sent {
             background-color: #dcf8c6;
@@ -65,9 +86,9 @@
             border-bottom-right-radius: 2px;
         }
         .sender-name {
-            font-size: 11px;
+            font-size: 10px;
             color: #666;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             font-weight: bold;
         }
         .input-area {
@@ -78,11 +99,10 @@
         }
         .input-area input {
             flex: 1;
-            padding: 12px 20px;
+            padding: 12px;
             border: none;
-            border-radius: 24px;
+            border-radius: 20px;
             outline: none;
-            font-size: 14px;
         }
         .input-area button {
             background-color: #128c7e;
@@ -90,12 +110,9 @@
             border: none;
             padding: 10px 20px;
             margin-right: 10px;
-            border-radius: 24px;
+            border-radius: 20px;
             cursor: pointer;
-            font-weight: bold;
         }
-
-        /* استایل صفحه ورود (Popup) */
         .login-popup {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -106,14 +123,13 @@
             align-items: center;
             z-index: 10;
             padding: 20px;
-            transition: opacity 0.3s;
         }
-        .login-popup h2 { margin-bottom: 20px; color: #075e54; }
         .login-popup input {
-            width: 100%;
+            width: 80%;
             padding: 12px;
             border: 1px solid #ccc;
-            border-radius: 8px;
+
+border-radius: 8px;
             margin-bottom: 15px;
             font-size: 16px;
         }
@@ -129,17 +145,22 @@
     </style>
 </head>
 <body>
-
-<div class="chat-container">
+    <div class="chat-container">
         <!-- صفحه ورود -->
         <div class="login-popup" id="loginPopup">
-            <h2>خوش آمدید</h2>
+            <h2>ورود به پیام‌رسان</h2>
             <input type="text" id="usernameInput" placeholder="نام خود را وارد کنید...">
-            <button onclick="login()">ورود به چت</button>
+            <button onclick="login()">ورود</button>
         </div>
 
-        <!-- صفحه چت -->
-        <div class="header">چت من</div>
+        <!-- نوار انتخاب مخاطب -->
+        <div class="header" id="headerTitle">چت خصوصی</div>
+        <div class="target-bar">
+            <span>چت با:</span>
+            <input type="text" id="targetUserInput" placeholder="نام مخاطب...">
+            <button onclick="setTarget()">تنظیم مخاطب</button>
+        </div>
+
         <div class="messages" id="messages"></div>
         <div class="input-area">
             <input type="text" id="messageInput" placeholder="پیام خود را بنویسید...">
