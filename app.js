@@ -37,11 +37,22 @@ function setTarget() {
     document.getElementById("messages").innerHTML = "";
 }
 
+// توابع ایموجی
+function toggleEmoji() {
+    let picker = document.getElementById("emojiPicker");
+    picker.style.display = picker.style.display === "grid" ? "none" : "grid";
+}
+
+function addEmoji(emoji) {
+    let input = document.getElementById("messageInput");
+    input.value += emoji;
+    document.getElementById("emojiPicker").style.display = "none"; // بستن پنل بعد از انتخاب
+}
+
 socket.onmessage = function(event) {
     try {
         let data = JSON.parse(event.data);
         
-        // 🔴 باگ‌گیری: اگر پیام از طرف خودم بود، اصلاً نمایش نده (چون خودم قبلاً نشون دادم)
         if (data.from === myUsername) return; 
 
         if (currentMode === "public" && data.type === "public") {
@@ -89,8 +100,6 @@ function sendMessage() {
     }
     
     socket.send(JSON.stringify(messageData));
-    
-    // نمایش پیام خودم روی صفحه (فقط یک بار)
     displayMessage(myUsername, text, true);
     
     input.value = "";
