@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پیام‌رسان PV</title>
+    <title>پیام‌رسان من</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -35,8 +35,26 @@
             font-size: 16px;
             font-weight: bold;
         }
-        .target-bar {
+        .tabs {
+            display: flex;
             background-color: #e9edef;
+        }
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            color: #555;
+            border-bottom: 3px solid transparent;
+        }
+        .tab.active {
+            color: #075e54;
+            border-bottom: 3px solid #075e54;
+            background-color: #ffffff;
+        }
+        .target-bar {
+            background-color: #ffffff;
             padding: 10px;
             display: flex;
             justify-content: space-between;
@@ -112,7 +130,8 @@
             margin-right: 10px;
             border-radius: 20px;
             cursor: pointer;
-        }
+
+}
         .login-popup {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -128,8 +147,7 @@
             width: 80%;
             padding: 12px;
             border: 1px solid #ccc;
-
-border-radius: 8px;
+            border-radius: 8px;
             margin-bottom: 15px;
             font-size: 16px;
         }
@@ -153,15 +171,22 @@ border-radius: 8px;
             <button onclick="login()">ورود</button>
         </div>
 
-        <!-- نوار انتخاب مخاطب -->
-        <div class="header" id="headerTitle">چت خصوصی</div>
-        <div class="target-bar">
+        <!-- هدر و تب‌ها -->
+        <div class="header" id="headerTitle">چت</div>
+        <div class="tabs">
+            <div class="tab active" id="tab-public" onclick="switchTab('public')">چت عمومی</div>
+            <div class="tab" id="tab-private" onclick="switchTab('private')">چت خصوصی</div>
+        </div>
+        
+        <!-- نوار مخاطب (فقط در PV نمایش داده میشه) -->
+        <div class="target-bar" id="targetBar" style="display: none;">
             <span>چت با:</span>
             <input type="text" id="targetUserInput" placeholder="نام مخاطب...">
-            <button onclick="setTarget()">تنظیم مخاطب</button>
+            <button onclick="setTarget()">تنظیم</button>
         </div>
 
         <div class="messages" id="messages"></div>
+        
         <div class="input-area">
             <input type="text" id="messageInput" placeholder="پیام خود را بنویسید...">
             <button onclick="sendMessage()">ارسال</button>
