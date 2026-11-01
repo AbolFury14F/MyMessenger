@@ -12,6 +12,32 @@ function login() {
     document.getElementById("headerTitle").innerText = "چت عمومی";
 }
 
+// 📌 توابع تنظیمات
+function openSettings() {
+    if (myUsername === "") return;
+    document.getElementById("newUsernameInput").value = myUsername;
+    document.getElementById("settingsPopup").style.display = "flex";
+}
+
+function closeSettings() {
+    document.getElementById("settingsPopup").style.display = "none";
+}
+
+function changeUsername() {
+    let newName = document.getElementById("newUsernameInput").value.trim();
+    if (newName === "") { alert("نام جدید رو وارد کن!"); return; }
+    myUsername = newName;
+    alert("نام شما با موفقیت به " + newName + " تغییر کرد.");
+    closeSettings();
+    
+    // آپدیت هدر بر اساس حالت فعلی
+    if (currentMode === "public") {
+        document.getElementById("headerTitle").innerText = "چت عمومی";
+    } else {
+        document.getElementById("headerTitle").innerText = targetUsername ? "چت با " + targetUsername : "چت خصوصی";
+    }
+}
+
 function switchTab(mode) {
     currentMode = mode;
     document.getElementById("messages").innerHTML = ""; 
@@ -37,13 +63,11 @@ function setTarget() {
     document.getElementById("messages").innerHTML = "";
 }
 
-// 📌 اضافه شدن منطق باز و بسته شدن پنل ایموجی
 function toggleEmoji() {
     let picker = document.getElementById("emojiPicker");
     picker.style.display = picker.style.display === "grid" ? "none" : "grid";
 }
 
-// 📌 اضافه شدن ایموجی به کادر تایپ
 function addEmoji(emoji) {
     let input = document.getElementById("messageInput");
     input.value += emoji;
@@ -53,7 +77,6 @@ function addEmoji(emoji) {
 socket.onmessage = function(event) {
     try {
         let data = JSON.parse(event.data);
-        
         if (data.from === myUsername) return; 
 
         if (currentMode === "public" && data.type === "public") {
