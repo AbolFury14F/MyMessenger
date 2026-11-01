@@ -68,7 +68,6 @@ function changeUsername() {
     closeSettings();
 }
 
-// 📌 تابع ذخیره عکس به صورت Base64 (بدون نیاز به سرور)
 function saveProfilePic() {
     let fileInput = document.getElementById("profilePicFile");
     let file = fileInput.files[0];
@@ -80,7 +79,7 @@ function saveProfilePic() {
 
     let reader = new FileReader();
     reader.onload = function(e) {
-        myProfilePic = e.target.result; // کد Base64 عکس
+        myProfilePic = e.target.result;
         localStorage.setItem("myProfilePic", myProfilePic);
         updateHeaderProfilePic();
         alert("عکس پروفایل با موفقیت ذخیره شد!");
@@ -140,17 +139,18 @@ socket.onmessage = function(event) {
         if (data.from === myUsername) return; 
 
         if (currentMode === "public" && data.type === "public") {
-            displayMessage(data.from, data.text, false);
+            displayMessage(data.from, data.text, false, data.profilePic);
         } else if (currentMode === "private" && data.type === "private") {
             if ((data.from === myUsername && data.to === targetUsername) || 
                 (data.from === targetUsername && data.to === myUsername)) {
-                displayMessage(data.from, data.text, false);
+                displayMessage(data.from, data.text, false, data.profilePic);
             }
         }
     } catch (e) { console.log("خطا:", e); }
 };
 
-function displayMessage(sender, text, isMe) {
+// 📌 تابع نمایش پیام با عکس پروفایل (اصلاح شده)
+function displayMessage(sender, text, isMe, profilePic) {
     var messagesBox = document.getElementById("messages");
     var newMessage = document.createElement("div");
     newMessage.className = isMe ? "message sent" : "message received";
@@ -158,9 +158,10 @@ function displayMessage(sender, text, isMe) {
     let msgHeader = document.createElement("div");
     msgHeader.className = "msg-header";
     
-    if (isMe && myProfilePic) {
+    // اگر عکس پروفایل وجود داشت، نمایش بده
+    if (profilePic) {
         let img = document.createElement("img");
-        img.src = myProfilePic;
+        img.src = profilePic;
         img.className = "profile-pic";
         msgHeader.appendChild(img);
     }
@@ -184,7 +185,8 @@ function sendMessage() {
     let text = input.value.trim();
     if (text === "") return;
     
-    let messageData = { from: myUsername, text: text };
+    // 📌 ارسال عکس پروفایل همراه پیام
+    let messageData = { from: myUsername, text: text, profilePic: myProfilePic };
     
     if (currentMode === "public") {
         messageData.type = "public";
@@ -195,7 +197,7 @@ function sendMessage() {
     }
     
     socket.send(JSON.stringify(messageData));
-    displayMessage(myUsername, text, true);
+    displayMessage(myUsername, text, true, myProfilePic);
     
     input.value = "";
 }
