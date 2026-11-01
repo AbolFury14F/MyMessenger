@@ -2,7 +2,7 @@ const socket = new WebSocket('wss://mymessenger-09ud.onrender.com');
 
 let myUsername = "";
 let targetUsername = "";
-let currentMode = "public"; 
+let currentMode = "public";
 
 function login() {
     let input = document.getElementById("usernameInput").value.trim();
@@ -41,8 +41,8 @@ socket.onmessage = function(event) {
     try {
         let data = JSON.parse(event.data);
         
-        // 🛑 اصلاح باگ: اگر پیام از طرف خودم بود، نادیده بگیر (چون قبلاً نشون دادیم)
-        if (data.from === myUsername) return;
+        // 🔴 باگ‌گیری: اگر پیام از طرف خودم بود، اصلاً نمایش نده (چون خودم قبلاً نشون دادم)
+        if (data.from === myUsername) return; 
 
         if (currentMode === "public" && data.type === "public") {
             displayMessage(data.from, data.text, false);
@@ -89,6 +89,7 @@ function sendMessage() {
     }
     
     socket.send(JSON.stringify(messageData));
+    
     // نمایش پیام خودم روی صفحه (فقط یک بار)
     displayMessage(myUsername, text, true);
     
