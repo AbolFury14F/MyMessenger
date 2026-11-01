@@ -13,7 +13,6 @@
             --text-color: #333;
             --input-bg: #f0f2f5;
         }
-        /* حالت تاریک */
         body.dark-mode {
             --bg-color: #121212;
             --chat-bg: #1e1e1e;
@@ -37,6 +36,11 @@
         }
         .header-title { font-weight: bold; font-size: 18px; color: #128c7e; }
         .settings-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-color); }
+
+        /* استایل عکس پروفایل */
+        .profile-pic { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; margin-left: 5px; vertical-align: middle; border: 2px solid #128c7e; }
+        .header-profile { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; margin-left: 10px; display: none; border: 2px solid #128c7e; }
+        .msg-header { display: flex; align-items: center; margin-bottom: 5px; }
         
         .tabs { display: flex; background: var(--header-bg); border-bottom: 1px solid #eee; }
         .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 600; color: #888; transition: all 0.3s; }
@@ -61,13 +65,12 @@
         }
         .sent { background-color: #dcf8c6; align-self: flex-start; border-top-right-radius: 0; color: #000; }
         .received { background-color: #ffffff; align-self: flex-end; border-top-left-radius: 0; color: #000; }
-        .sender-name { font-size: 12px; color: #128c7e; margin-bottom: 5px; font-weight: bold; }
+        .sender-name { font-size: 12px; color: #128c7e; margin-bottom: 0; font-weight: bold; }
 
-        .input-area { display: flex; padding: 15px; background: var(--input-bg); align-items: center; }
+.input-area { display: flex; padding: 15px; background: var(--input-bg); align-items: center; }
         .emoji-btn { background: none; border: none; font-size: 26px; cursor: pointer; margin-left: 10px; padding: 0; transition: transform 0.2s; }
         .emoji-btn:hover { transform: scale(1.1); }
-
-.input-area input {
+        .input-area input {
             flex: 1; padding: 12px 15px; border: none; border-radius: 25px;
             outline: none; font-size: 15px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
             background: var(--header-bg); color: var(--text-color);
@@ -86,7 +89,6 @@
         .emoji-picker span { font-size: 26px; cursor: pointer; padding: 5px; border-radius: 8px; transition: background 0.2s; }
         .emoji-picker span:hover { background-color: #f0f0f0; }
 
-        /* پنجره‌های پاپ‌آپ */
         .popup {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--header-bg); display: flex; flex-direction: column;
@@ -111,7 +113,6 @@
         <!-- صفحه تنظیمات -->
         <div class="popup" id="settingsPopup" style="display: none;">
             <h2>⚙️ تنظیمات</h2>
-            
             <p style="margin-bottom: 10px; font-size: 14px;">تغییر نام:</p>
             <input type="text" id="newUsernameInput" placeholder="نام جدید...">
             <button onclick="changeUsername()">ذخیره نام</button>
@@ -126,11 +127,16 @@
             <button onclick="closeSettings()">بستن</button>
         </div>
 
-        <!-- هدر و تب‌ها -->
+        <!-- هدر -->
         <div class="header">
-            <div class="header-title" id="headerTitle">چت‌ها</div>
+            <div style="display: flex; align-items: center;">
+                <img id="headerProfilePic" class="header-profile" src="" alt="Profile">
+                <div class="header-title" id="headerTitle">چت‌ها</div>
+            </div>
             <button class="settings-btn" onclick="openSettings()">⚙️</button>
         </div>
+
+<!-- تب‌ها -->
         <div class="tabs">
             <div class="tab active" id="tab-public" onclick="switchTab('public')">چت عمومی</div>
             <div class="tab" id="tab-private" onclick="switchTab('private')">چت خصوصی</div>
@@ -144,7 +150,7 @@
 
         <div class="messages" id="messages"></div>
 
-<!-- پنل ایموجی -->
+        <!-- پنل ایموجی -->
         <div class="emoji-picker" id="emojiPicker">
             <span onclick="addEmoji('😊')">😊</span>
             <span onclick="addEmoji('😂')">😂</span>
