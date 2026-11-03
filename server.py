@@ -2,76 +2,146 @@ import asyncio
 import websockets
 import os
 import json
-import sqlite3
+from supabase import create_client
+
+# اتصال به Supabase
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise RuntimeError("Supabase environment variables are missing")
+
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 connected_clients = {}
 
-# ساخت دیتابیس در شروع کار
-def init_db():
-    conn = sqlite3.connect("chat.db")
-    c = conn.cursor()
-    c.execute("""CREATE TABLE IF NOT EXISTS messages (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        type TEXT, sender TEXT, receiver TEXT, text TEXT
-    )""")
-    conn.commit()
-    conn.close()
 
-# ذخیره پیام
+# ذخیره پیام در دیتابیس
 def save_message(data):
-    conn = sqlite3.connect("chat.db")
-    c = conn.cursor()
-    c.execute("INSERT INTO messages (type, sender, receiver, text) VALUES (?, ?, ?, ?)",
-              (data.get("type"), data.get("from"), data.get("to"), data.get("text")))
-    conn.commit()
-    conn.close()
+    result = supabase.table("messages").insert({
+        "type": data["type"],
+        "sender": data["from"],
+        "receiver": data.get("to"),
+        "message": data["text"]
+    }).execute()
 
-# گرفتن تاریخچه
-def get_history(user_name):
-    conn = sqlite3.connect("chat.db")
-    c = conn.cursor()
-    c.execute("SELECT type, sender, receiver, text FROM messages WHERE type='public' OR (type='private' AND (sender=? OR receiver=?)) ORDER BY id ASC", (user_name, user_name))
-    rows = c.fetchall()
-    conn.close()
-    return [{"type": r[0], "from": r[1], "to": r[2], "text": r[3]} for r in rows]
+    return result
+
+
+# دریافت تاریخچه پیام‌ها
+def get_history(username):
+    public_messages = (
+        supabase.table("messages")
+        .select("id,type,sender,receiver,message")
+        .eq("type", "public")
+        .order("id")
+        .execute()
+        .data
+    )
+
+    private_messages = (
+        supabase.table("messages")
+        .select("id,type,sender,receiver,message")
+        .eq("type", "private")
+        .or_(f"sender.eq.{username},receiver.eq.{username}")
+        .order("id")
+        .execute()
+        .data
+    )
+
+    messages = public_messages + private_messages
+    messages.sort(key=lambda x: x["id"])
+
+    return [
+        {
+            "type": msg["type"],
+            "from": msg["sender"],
+            "to": msg["receiver"],
+            "text": msg["message"],
+            "history": True
+        }
+        for msg in messages
+    ]
+
 
 async def handler(websocket):
     user_name = None
+
     try:
         async for message in websocket:
             data = json.loads(message)
+
             if data.get("type") == "init":
                 user_name = data.get("from")
+
+                if not user_name:
+                    continue
+
                 connected_clients[user_name] = websocket
-                history = get_history(user_name)
+
+                history = await asyncio.to_thread(
+                    get_history, user_name
+                )
+
                 for msg in history:
                     await websocket.send(json.dumps(msg))
+
                 continue
 
-            save_message(data)
+            if data.get("type") not in ("public", "private"):
+                continue
 
-            if data.get("type") == "public":
-                for client_name, client_ws in connected_clients.items():
-                    if client_name != data.get("from"):
-                        try: await client_ws.send(message)
-                        except: pass
-            elif data.get("type") == "private":
+            if not data.get("from") or not data.get("text"):
+                continue
+
+            if data.get("from") != user_name:
+                continue
+
+            if data["type"] == "private" and not data.get("to"):
+                continue
+
+            await asyncio.to_thread(save_message, data)
+
+            if data["type"] == "public":
+                for client_name, client_ws in list(connected_clients.items()):
+                    if client_name != user_name:
+                        try:
+                            await client_ws.send(message)
+                        except websockets.exceptions.ConnectionClosed:
+                            pass
+
+            elif data["type"] == "private":
                 target = data.get("to")
+
                 if target in connected_clients:
-                    try: await connected_clients[target].send(message)
-                    except: pass
+                    try:
+                        await connected_clients[target].send(message)
+                    except websockets.exceptions.ConnectionClosed:
+                        pass
+
     except websockets.exceptions.ConnectionClosed:
         pass
+
+    except Exception as error:
+        print("Server error:", error)
+
     finally:
-        if user_name and user_name in connected_clients:
+        if user_name and connected_clients.get(user_name) is websocket:
             del connected_clients[user_name]
 
+
 async def main():
-    init_db()
     port = int(os.environ.get("PORT", 8765))
-    async with websockets.serve(handler, "0.0.0.0", port):
-        print(f"سرور دیتابیس روی پورت {port} روشن شد...")
+
+    async with websockets.serve(
+        handler,
+        "0.0.0.0",
+        port
+    ):
+        print("MyMessenger connected to Supabase!")
+
         await asyncio.Future()
 
-if __name__ == "__main__":
+
+if name == "__main__":
     asyncio.run(main())
